@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quicklist — Lista de Compras</title>
+
+    <!-- ============================================================
+         FONTES
+         Sora: fonte geométrica moderna para títulos
+         Plus Jakarta Sans: corpo elegante e legível
+    ============================================================ -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@700;800&display=swap" rel="stylesheet">
+
+    <style>
+        /* ===========================================================
+           VARIÁVEIS CSS
+           -----------------------------------------------------------
+           Tema escuro sofisticado com acentos em verde-menta.
+           Altere estes valores para personalizar o visual inteiro.
+        =========================================================== */
+        :root {
+            --bg-page: #0f1117;
+            --bg-card: #181a20;
+            --bg-card-hover: #1e2028;
+            --bg-input: #1e2028;
+            --bg-section: #14161c;
+            --accent: #34d399;
+            --accent-dim: #34d39922;
+            --accent-hover: #2bc48a;
+            --danger: #f87171;
+            --danger-dim: #f8717115;
+            --texto: #e8e8ed;
+            --texto-secundario: #7a7d8b;
+            --texto-muted: #4a4d58;
+            --borda: #2a2d38;
+            --borda-light: #23252e;
+            --tag-frutas: #fb923c;
+            --tag-limpeza: #60a5fa;
+            --tag-bebidas: #a78bfa;
+            --tag-padaria: #fbbf24;
+            --tag-outros: #94a3b8;
+            --font-display: 'Sora', sans-serif;
+            --font-body: 'Plus Jakarta Sans', sans-serif;
+            --radius: 12px;
+            --radius-sm: 8px;
+            --shadow: 0 4px 24px rgba(0,0,0,0.25);
+        }
+
+        /* ===========================================================
+           RESET E BASE
+        =========================================================== */
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--bg-page);
+            color: var(--texto);
+            min-height: 100vh;
+            background-image:
+                radial-gradient(circle at 15% 15%, #34d39908 0%, transparent 40%),
+                radial-gradient(circle at 85% 80%, #60a5fa06 0%, transparent 40%);
+        }
+
+        /* ===========================================================
+           CONTAINER PRINCIPAL
+        =========================================================== */
+        .app {
+            max-width: 680px;
+            margin: 0 auto;
+            padding: 32px 20px 60px;
+        }
+
+        /* ===========================================================
+           CABEÇALHO COM DATA/HORA
+        =========================================================== */
+        .header {
+            margin-bottom: 32px;
+            animation: fadeSlideDown 0.5s ease-out;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-icon {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, var(--accent), #059669);
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            box-shadow: 0 4px 16px #34d39935;
+        }
+
+        .brand h1 {
+            font-family: var(--font-display);
+            font-size: 1.7rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, var(--accent), #6ee7b7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .data-hora {
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        .data-atual {
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: var(--texto);
+        }
+
+        .hora-atual {
+            font-size: 0.82rem;
+            color: var(--texto-secundario);
+            margin-top: 2px;
+        }
+
+        /* ===========================================================
+           BARRA DE PROGRESSO
+        =========================================================== */
+        .progresso-wrapper {
+            margin-top: 24px;
+            animation: fadeSlideDown 0.5s ease-out 0.1s both;
+        }
+
+        .progresso-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 8px;
+        }
+
+        .progresso-label {
+            font-size: 0.85rem;
+            color: var(--texto-secundario);
+        }
+
+        .progresso-porcentagem {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .progresso-barra {
+            width: 100%;
+            height: 6px;
+            background: var(--borda);
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .progresso-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), #6ee7b7);
+            border-radius: 20px;
+            transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            width: 0%;
+        }
+
+        /* ===========================================================
+           FORMULÁRIO DE ADIÇÃO
+        =========================================================== */
+        .form-card {
+            background: var(--bg-card);
+            border: 1px solid var(--borda);
+            border-radius: 16px;
+            padding: 20px;
+            margin-top: 24px;
+            animation: fadeSlideDown 0.5s ease-out 0.15s both;
+        }
+
+        .form-card h2 {
+            font-size: 0.82rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: var(--texto-secundario);
+            margin-bottom: 14px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 80px;
+            gap: 10px;
+        }
+
+        .form-grid input {
+            padding: 12px 14px;
+            background: var(--bg-input);
+            border: 1.5px solid var(--borda);
+            border-radius: var(--radius-sm);
+            color: var(--texto);
+            font-family: var(--font-body);
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .form-grid input::placeholder {
+            color: var(--texto-muted);
+        }
+
+        .form-grid input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-dim);
+        }
+
+        .input-qtd {
+            text-align: center;
+        }
+
+        .form-row-2 {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .form-row-2 select {
+            flex: 1;
+            padding: 12px 14px;
+            background: var(--bg-input);
+            border: 1.5px solid var(--borda);
+            border-radius: var(--radius-sm);
+            color: var(--texto);
+            font-family: var(--font-body);
+            font-size: 0.9rem;
+            outline: none;
+            cursor: pointer;
+            transition: border-color 0.2s;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237a7d8b' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 34px;
+        }
+
+        .form-row-2 select:focus {
+            border-color: var(--accent);
+        }
+
+        .btn-add {
+            padding: 12px 24px;
+            background: var(--accent);
+            color: #0f1117;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-family: var(--font-body);
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-add:hover {
+            background: var(--accent-hover);
+            box-shadow: 0 4px 16px #34d39930;
+        }
+
+        .btn-add:active {
+            transform: scale(0.96);
+        }
+
+        /* ===========================================================
+           BARRA DE BUSCA
+        =========================================================== */
+        .busca-wrapper {
+            position: relative;
+            margin-top: 24px;
+            animation: fadeSlideDown 0.5s ease-out 0.2s both;
+        }
+
+        .busca-wrapper input {
+            width: 100%;
+            padding: 12px 14px 12px 42px;
+            background: var(--bg-card);
+            border: 1px solid var(--borda);
+            border-radius: var(--radius);
+            color: var(--texto);
+            font-family: var(--font-body);
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .busca-wrapper input:focus {
+            border-color: var(--accent);
+        }
+
+        .busca-wrapper input::placeholder {
+            color: var(--texto-muted);
+        }
+
+        .busca-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--texto-muted);
+            font-size: 1rem;
+            pointer-events: none;
+        }
+
+        /* ===========================================================
+           SEÇÕES (Pendentes / Concluídos)
+        =========================================================== */
+        .secao {
+            margin-top: 28px;
+        }
+
+        .secao-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            padding: 0 2px;
+        }
+
+        .secao-titulo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .secao-titulo h3 {
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--texto-secundario);
+        }
+
+        .secao-badge {
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 20px;
+            background: var(--accent-dim);
+            color: var(--accent);
+        }
+
+        .secao-badge.concluidos {
+            background: var(--danger-dim);
+            color: var(--texto-muted);
+        }
+
+        .btn-limpar {
+            font-family: var(--font-body);
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--texto-muted);
+            background: none;
+            border: 1px solid var(--borda);
+            border-radius: var(--radius-sm);
+            padding: 5px 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-limpar:hover {
+            border-color: var(--danger);
+            color: var(--danger);
+            background: var(--danger-dim);
+        }
+
+        /* ===========================================================
+           CARD DE ITEM
+        =========================================================== */
+        .items-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .item {
+            background: var(--bg-card);
+            border: 1px solid var(--borda);
+            border-radius: var(--radius);
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.25s ease;
+            animation: fadeSlideUp 0.35s ease-out both;
+        }
+
+        .item:hover {
+            background: var(--bg-card-hover);
+            border-color: #33364050;
+        }
+
+        .item.concluido {
+            opacity: 0.5;
+        }
+
+        .item.concluido .item-nome {
+            text-decoration: line-through;
+            color: var(--texto-muted);
+        }
+
+        /* ---- Checkbox customizado ---- */
+        .ck-wrapper {
+            position: relative;
+            width: 22px;
+            height: 22px;
+            flex-shrink: 0;
+        }
+
+        .ck-wrapper input[type="checkbox"] {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+            z-index: 2;
+        }
+
+        .ck-visual {
+            position: absolute;
+            inset: 0;
+            border: 2px solid var(--borda);
+            border-radius: 6px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .ck-visual::after {
+            content: '';
+            width: 10px;
+            height: 10px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230f1117' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E");
+            background-size: contain;
+            background-repeat: no-repeat;
+            opacity: 0;
+            transform: scale(0);
+            transition: all 0.2s;
+        }
+
+        .ck-wrapper input:checked + .ck-visual {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .ck-wrapper input:checked + .ck-visual::after {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .item-nome {
+            flex: 1;
+            font-size: 0.95rem;
+            font-weight: 500;
+            word-break: break-word;
+            transition: all 0.3s;
+        }
+
+        /* Tags de categoria */
+        .item-tag {
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            flex-shrink: 0;
+        }
+
+        .tag-frutas     { background: #fb923c18; color: var(--tag-frutas); }
+        .tag-limpeza    { background: #60a5fa18; color: var(--tag-limpeza); }
+        .tag-bebidas    { background: #a78bfa18; color: var(--tag-bebidas); }
+        .tag-padaria    { background: #fbbf2418; color: var(--tag-padaria); }
+        .tag-carnes     { background: #f8717118; color: var(--danger); }
+        .tag-outros     { background: #94a3b818; color: var(--tag-outros); }
+
+        .item-qtd {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--texto-secundario);
+            background: var(--bg-input);
+            padding: 3px 10px;
+            border-radius: 6px;
+            flex-shrink: 0;
+        }
+
+        .btn-del {
+            background: none;
+            border: none;
+            color: var(--texto-muted);
+            font-size: 1.05rem;
+            cursor: pointer;
+            padding: 4px 6px;
+            border-radius: 6px;
+            transition: all 0.2s;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-del:hover {
+            color: var(--danger);
+            background: var(--danger-dim);
+        }
+
+        .item.removendo {
+            animation: slideRemove 0.4s ease forwards;
+        }
+
+        /* ===========================================================
+           ESTADO VAZIO
+        =========================================================== */
+        .vazio {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--texto-muted);
+        }
+
+        .vazio-icon {
+            font-size: 2.8rem;
+            margin-bottom: 12px;
+            opacity: 0.6;
+        }
+
+        .vazio p {
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        /* ===========================================================
+           TOAST
+        =========================================================== */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            background: var(--bg-card);
+            border: 1px solid var(--borda);
+            color: var(--texto);
+            padding: 12px 22px;
+            border-radius: var(--radius);
+            font-family: var(--font-body);
+            font-weight: 600;
+            font-size: 0.9rem;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            z-index: 1000;
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .toast.visivel {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .toast-accent {
+            width: 4px;
+            height: 20px;
+            border-radius: 4px;
+            background: var(--accent);
+            flex-shrink: 0;
+        }
+
+        /* ===========================================================
+           KEYFRAMES
+        =========================================================== */
+        @keyframes fadeSlideDown {
+            from { opacity: 0; transform: translateY(-14px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeSlideUp {
+            from { opacity: 0; transform: translateY(12px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideRemove {
+            to {
+                opacity: 0;
+                transform: translateX(50px);
+                max-height: 0;
+                padding-top: 0;
+                padding-bottom: 0;
+                margin-bottom: 0;
+                overflow: hidden;
+            }
+        }
+
+        /* ===========================================================
+           RESPONSIVIDADE MOBILE
+        =========================================================== */
+        @media (max-width: 520px) {
+            .app {
+                padding: 20px 14px 48px;
+            }
+
+            .header-top {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .data-hora {
+                text-align: left;
+            }
+
+            .brand h1 {
+                font-size: 1.4rem;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr 64px;
+            }
+
+            .form-row-2 {
+                flex-direction: column;
+            }
+
+            .btn-add {
+                width: 100%;
+                text-align: center;
+            }
+
+            .item {
+                padding: 12px;
+                gap: 10px;
+                flex-wrap: wrap;
+            }
+
+            .item-meta-mobile {
+                display: flex;
+                gap: 8px;
+                width: 100%;
+                padding-left: 34px;
+                margin-top: -4px;
+            }
+
+            .item-tag, .item-qtd {
+                font-size: 0.68rem;
+            }
+        }
+
+        @media (min-width: 521px) {
+            .item-meta-mobile {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Toast de notificação -->
+    <div class="toast" id="toast">
+        <div class="toast-accent"></div>
+        <span id="toastMsg"></span>
+    </div>
+
+    <div class="app">
+
+        <!-- ============================================================
+             CABEÇALHO — Logo + Data/Hora
+        ============================================================ -->
+        <header class="header">
+            <div class="header-top">
+                <div class="brand">
+                    <div class="brand-icon">🛒</div>
+                    <h1>Quicklist</h1>
+                </div>
+                <div class="data-hora">
+                    <div class="data-atual" id="dataAtual"></div>
+                    <div class="hora-atual" id="horaAtual"></div>
+                </div>
+            </div>
+
+            <!-- Barra de progresso -->
+            <div class="progresso-wrapper" id="progressoWrapper">
+                <div class="progresso-info">
+                    <span class="progresso-label" id="progressoLabel">0 de 0 itens comprados</span>
+                    <span class="progresso-porcentagem" id="progressoPorcentagem">0%</span>
+                </div>
+                <div class="progresso-barra">
+                    <div class="progresso-fill" id="progressoFill"></div>
+                </div>
+            </div>
+        </header>
+
+        <!-- ============================================================
+             FORMULÁRIO DE ADIÇÃO
+        ============================================================ -->
+        <div class="form-card">
+            <h2>Novo Item</h2>
+            <div class="form-grid">
+                <input type="text" id="inputNome" placeholder="Nome do item..." autocomplete="off">
+                <input type="number" id="inputQtd" class="input-qtd" placeholder="Qtd" value="1" min="1">
+            </div>
+            <div class="form-row-2">
+                <select id="selectCat">
+                    <option value="outros">📦 Outros</option>
+                    <option value="frutas">🍎 Frutas e Verduras</option>
+                    <option value="carnes">🥩 Carnes</option>
+                    <option value="padaria">🥖 Padaria</option>
+                    <option value="bebidas">🥤 Bebidas</option>
+                    <option value="limpeza">🧹 Limpeza</option>
+                </select>
+                <button class="btn-add" onclick="adicionarItem()">+ Adicionar</button>
+            </div>
+        </div>
+
+        <!-- ============================================================
+             BUSCA
+        ============================================================ -->
+        <div class="busca-wrapper">
+            <span class="busca-icon">🔍</span>
+            <input type="text" id="inputBusca" placeholder="Buscar na lista..." oninput="renderizar()">
+        </div>
+
+        <!-- ============================================================
+             SEÇÃO: ITENS PENDENTES
+        ============================================================ -->
+        <div class="secao" id="secaoPendentes"></div>
+
+        <!-- ============================================================
+             SEÇÃO: ITENS CONCLUÍDOS
+        ============================================================ -->
+        <div class="secao" id="secaoConcluidos"></div>
+    </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
